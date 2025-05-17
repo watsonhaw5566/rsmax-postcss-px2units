@@ -1,7 +1,6 @@
-var postcss = require('postcss')
-var expect= require('chai').expect
-
-var plugin = require('../')
+const postcss = require('postcss');
+const expect = require('chai').expect;
+const plugin = require('../index');
 
 function test (input, output, opts, done) {
   postcss([plugin(opts)])

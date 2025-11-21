@@ -1,100 +1,93 @@
-const postcss = require('postcss');
-const expect = require('chai').expect;
-const plugin = require('../index');
+import {expect, test} from '@rstest/core';
+import postcss from 'postcss';
+import * as pluginModule from '../index.js';
 
-function test (input, output, opts, done) {
-  postcss([plugin(opts)])
-    .process(input, {from: undefined})
-    .then((result) => {
-      expect(result.css).to.eql(output);
-      expect(result.warnings()).to.be.empty;
-      done();
-    })
-    .catch((error) => {
-      done(error);
-    })
+const plugin = pluginModule.default || pluginModule;
+
+async function run(input, opts = {}) {
+    return await postcss([plugin(opts)]).process(input, {from: undefined});
 }
 
-describe('postcss-px2units', () => {
-  it('replace pixel values', (done) => {
-    test(`.title {
+test('replace pixel values', async () => {
+    const result = await run(`.title {
       font-size: 24px;
       background-image: url(../slice/icon-wh.png);
       margin: 0 0 0 5px;
       vertical-align: -1px;
       display: flex;
-    }`, `.title {
+    }`, {});
+    expect(result.css).toBe(`.title {
       font-size: 24rpx;
       background-image: url(../slice/icon-wh.png);
       margin: 0 0 0 5rpx;
       vertical-align: -1rpx;
       display: flex;
-    }`, {}, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('rpx not be replaced', (done) => {
-    test(`.title2 {
+test('rpx not be replaced', async () => {
+    const result = await run(`.title2 {
       padding: 20rpx 30px 2rem 4em;
-    }`, `.title2 {
+    }`, {});
+    expect(result.css).toBe(`.title2 {
       padding: 20rpx 30rpx 2rem 4em;
-    }`, {}, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('pixel values not be replaced', (done) => {
-    test(`.title3 {
+test('pixel values not be replaced', async () => {
+    const result = await run(`.title3 {
       padding: 20rpx 30px 2rem 4em; /* no */
       margin: 40px;
       font-size: 24px; /* no */
-    }`, `.title3 {
+    }`, {comment: 'no'});
+    expect(result.css).toBe(`.title3 {
       padding: 20rpx 30px 2rem 4em;
       margin: 40rpx;
       font-size: 24px;
-    }`, {
-      comment: 'no'
-    }, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('replace pixel values with px / opts.divisor', (done) => {
-    test(`.title4 {
+test('replace pixel values with px / opts.divisor', async () => {
+    const result = await run(`.title4 {
       padding: 30px;
       margin: 40px;
-    }`, `.title4 {
+    }`, {divisor: 3, decimalPlaces: 2});
+    expect(result.css).toBe(`.title4 {
       padding: 10rpx;
       margin: 13.33rpx;
-    }`, {
-      divisor: 3,
-      decimalPlaces: 2
-    }, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('replace pixel values with px * opts.multiple', (done) => {
-    test(`.title5 {
+test('replace pixel values with px * opts.multiple', async () => {
+    const result = await run(`.title5 {
       padding: 30px;
       margin: 40px;
-    }`, `.title5 {
+    }`, {multiple: 2});
+    expect(result.css).toBe(`.title5 {
       padding: 60rpx;
       margin: 80rpx;
-    }`, {
-      multiple: 2
-    }, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('replace pixel values with rem units', (done) => {
-    test(`.title6 {
+test('replace pixel values with rem units', async () => {
+    const result = await run(`.title6 {
       padding: 30px;
       margin: 40px;
-    }`, `.title6 {
+    }`, {divisor: 2, decimalPlaces: 2, targetUnits: 'rem'});
+    expect(result.css).toBe(`.title6 {
       padding: 15rem;
       margin: 20rem;
-    }`, {
-      divisor: 2,
-      decimalPlaces: 2,
-      targetUnits: 'rem'
-    }, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('work in media', (done) => {
-    test(`@media (-webkit-min-device-pixel-ratio: 2), (min-device-pixel-ratio: 2) {
+test('work in media', async () => {
+    const result = await run(`@media (-webkit-min-device-pixel-ratio: 2), (min-device-pixel-ratio: 2) {
       .word {
         margin-top: 30px;
         margin-bottom: 40px;
@@ -104,7 +97,8 @@ describe('postcss-px2units', () => {
         margin-top: 50px;
         margin-bottom: 60px;
       }
-    }`, `@media (-webkit-min-device-pixel-ratio: 2), (min-device-pixel-ratio: 2) {
+    }`);
+    expect(result.css).toBe(`@media (-webkit-min-device-pixel-ratio: 2), (min-device-pixel-ratio: 2) {
       .word {
         margin-top: 30rpx;
         margin-bottom: 40rpx;
@@ -114,11 +108,12 @@ describe('postcss-px2units', () => {
         margin-top: 50rpx;
         margin-bottom: 60rpx;
       }
-    }`, {}, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('work in keyframes', (done) => {
-    test(`@keyframes anim {
+test('work in keyframes', async () => {
+    const result = await run(`@keyframes anim {
       0% {
         width: 10px;
         height: 10px;
@@ -129,7 +124,8 @@ describe('postcss-px2units', () => {
         height: 20px;
         font-size: 42px;
       }
-    }`, `@keyframes anim {
+    }`);
+    expect(result.css).toBe(`@keyframes anim {
       0% {
         width: 10rpx;
         height: 10rpx;
@@ -140,26 +136,32 @@ describe('postcss-px2units', () => {
         height: 20rpx;
         font-size: 42rpx;
       }
-    }`, {}, done)
-  })
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('work in others', (done) => {
-    test(`.main {background: 12px 12rpx url('https://px.test.com/rpx/PX/pX.png')}`, `.main {background: 12rpx 12rpx url('https://px.test.com/rpx/PX/pX.png')}`, {}, done)
-  })
+test('work in others', async () => {
+    const result = await run(`.main {background: 12px 12rpx url('https://px.test.com/rpx/PX/pX.png')}`);
+    expect(result.css).toBe(`.main {background: 12rpx 12rpx url('https://px.test.com/rpx/PX/pX.png')}`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('ignore uppercase value', (done) => {
-    test(`.title {
+test('ignore uppercase value', async () => {
+    const result = await run(`.title {
       font-size: 24PX;
-    }`, `.title {
+    }`);
+    expect(result.css).toBe(`.title {
       font-size: 24PX;
-    }`, {}, done)
-  });
+    }`);
+    expect(result.warnings().length).toBe(0);
+});
 
-  it('ignore min value', (done) => {
-    test(`.title {
+test('ignore min value', async () => {
+    const result = await run(`.title {
       font-size: 0px;
-    }`, `.title {
+    }`);
+    expect(result.css).toBe(`.title {
       font-size: 0px;
-    }`, {}, done)
-  });
-})
+    }`);
+    expect(result.warnings().length).toBe(0);
+});

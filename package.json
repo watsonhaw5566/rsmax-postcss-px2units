@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "format": "prettier --write ./index.js",
-    "test": "mocha --repotter spec test"
+    "test": "rstest run"
   },
   "repository": {
     "type": "git",
@@ -23,12 +23,10 @@
   },
   "homepage": "https://github.com/yingye/postcss-px2units#readme",
   "dependencies": {
-    "object-assign": "^4.1.1",
     "postcss": "^8.4.31"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^11.3.0",
+    "@rstest/core": "^0.6.6",
     "prettier": "^3.5.3"
   },
   "publishConfig": {

@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       postcss:
-        specifier: ^8.4.31
+        specifier: ^8.0.0
         version: 8.5.3
     devDependencies:
       '@rstest/core':

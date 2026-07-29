@@ -3,10 +3,6 @@
   "version": "0.2.2",
   "description": "postcss plugin",
   "main": "index.js",
-  "scripts": {
-    "format": "prettier --write ./index.js",
-    "test": "rstest run"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yingye/postcss-px2units.git"
@@ -14,16 +10,16 @@
   "keywords": [
     "postcss",
     "plugin",
-    "pxtotarget"
+    "px2units"
   ],
-  "author": "yingye",
+  "authors": [
+    "yingye",
+    "watsonhaw"
+  ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/yingye/postcss-px2units/issues"
-  },
-  "homepage": "https://github.com/yingye/postcss-px2units#readme",
+  "homepage": "https://github.com/watsonhaw5566/rsmax-postcss-px2units",
   "dependencies": {
-    "postcss": "^8.0.0"
+    "postcss": "^8.5.18"
   },
   "scripts": {
     "format": "prettier --write ./index.js",

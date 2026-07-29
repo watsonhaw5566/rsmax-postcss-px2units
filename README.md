@@ -1,101 +1,131 @@
-English | [简体中文](./README_CN.md)
+# @rsmax/postcss-px2units
 
-# postcss-px2units
+一个 [PostCSS](https://github.com/ai/postcss) 插件，用于将像素单位（px）转换为 rpx 或其他自定义单位。
 
-[![Build Status](https://travis-ci.org/yingye/postcss-px2units.svg?branch=master)](https://travis-ci.org/yingye/postcss-px2units)
-[![npm version](https://badge.fury.io/js/postcss-px2units.svg)](https://badge.fury.io/js/postcss-px2units)
-[![change-log](https://img.shields.io/badge/changelog-md-blue.svg)](https://github.com/yingye/postcss-px2units/blob/master/CHANGELOG.md)
+## 功能特性
 
-A plugin for [PostCSS](https://github.com/ai/postcss) that generates rpx units from pixel units, it also can generate units which you want.
+- **小写 px**：转换为目标单位（默认为 rpx）
+- **大写 PX 或 Px**：保留为 px（输出时转为小写 px）
+- **注释跳过**：使用注释跳过单个声明的转换
+- **最小像素过滤**：小于阈值的像素值不进行转换
 
-## Install
+## 安装
 
 ```
-$ npm install postcss-px2units --save-dev
+$ npm install @rsmax/postcss-px2units --save-dev
 ```
 
-## Usage
+## 使用方法
 
-### Input/Output
+### 输入/输出示例
 
-With the default settings, we will get this output.
+使用默认配置，将得到以下输出结果。
 
 ```css
-/* input */
+/* 输入 */
 p {
   margin: 0 0 20px;
   font-size: 32px;
   line-height: 1.2;
   letter-spacing: 1px; /* no */
+  border: 1PX solid #ccc;
+  padding: 10Px 20px;
 }
 
-/* output */
+/* 输出 */
 p {
   margin: 0 0 20rpx;
   font-size: 32rpx;
   line-height: 1.2;
   letter-spacing: 1px;
+  border: 1px solid #ccc;
+  padding: 10px 20rpx;
 }
 ```
 
-### Example
+### 使用示例
 
 ```js
 var fs = require('fs');
 var postcss = require('postcss');
-var pxtorem = require('postcss-pxtorem');
+var px2units = require('@rsmax/postcss-px2units');
 var css = fs.readFileSync('main.css', 'utf8');
 var options = {
-    replace: false
+  targetUnits: 'rem',
+  divisor: 100
 };
-var processedCss = postcss(pxtorem(options)).process(css).css;
+var processedCss = postcss([px2units(options)]).process(css).css;
 
 fs.writeFile('main-rem.css', processedCss, function (err) {
   if (err) {
     throw err;
   }
-  console.log('Rem file written.');
+  console.log('Rem 文件写入完成。');
 });
 ```
 
-### options
+### 配置项 options
 
-Type: Object | Null
+类型：Object | Null
 
-Default:
+默认值：
 
 ```js
 {
   divisor: 1,
   multiple: 1,
   decimalPlaces: 2,
+  targetUnits: 'rpx',
   comment: 'no',
-  targetUnits: 'rpx'
+  minPixelValue: 0
 }
 ```
 
-Detail:
+配置说明：
 
-- divisor(Number): divisor, replace pixel value with pixel / divisor.
-- multiple(Number): multiple, replace pixel value with pixel * multiple.
-- decimalPlaces(Number): the number of decimal places. For example, the css code is `width: 100px`, we will get the vaule is `Number(100 / divisor * multiple).toFixed(decimalPlaces)`.
-- comment(String): default value is 'no'. For example, if you set it 'not replace', the css code `width: 100px; /* not replace */` will be translated to `width: 100px;`
-- targetUnits(String): The units will replace pixel units, you can set it 'rem'.
+- **divisor** (Number)：除数，像素值转换公式为 `像素值 * multiple / divisor`。
+- **multiple** (Number)：乘数，像素值转换公式为 `像素值 * multiple / divisor`。
+- **decimalPlaces** (Number)：保留的小数位数。例如，CSS 代码 `width: 100px`，转换后的值为 `Number(100 / divisor * multiple).toFixed(decimalPlaces)`。
+- **targetUnits** (String)：目标单位，用于替换像素单位，可设置为 'rem'、'em'、'vw' 等。
+- **comment** (String)：默认值为 'no'。例如，如果设置为 '不转换'，CSS 代码 `width: 100px; /* 不转换 */` 将被转换为 `width: 100px;`，同时注释会被移除。
+- **minPixelValue** (Number)：最小转换像素值。如果像素值小于该值，则不会被转换。默认为 0，表示所有值都会被转换。
 
-### Use with gulp-postcss
+### 配合 gulp-postcss 使用
 
 ```js
 var gulp = require('gulp');
 var postcss = require('gulp-postcss');
-var pxtounits = require('postcss-pxtounits');
+var px2units = require('@rsmax/postcss-px2units');
 
 gulp.task('css', function () {
   return gulp.src('./test/src/css/**/*.css')
-    .pipe(postcss([pxtounits()]))
+    .pipe(postcss([px2units()]))
     .pipe(gulp.dest('./test/dist/css'));
 });
 ```
 
-## Tips
+### 使用 minPixelValue 配置
 
-If you want to use it in WePY, please use [wepy-plugin-px2units](https://github.com/yingye/wepy-plugin-px2units).
+```js
+var px2units = require('@rsmax/postcss-px2units');
+
+var options = {
+  minPixelValue: 2
+};
+```
+
+```css
+/* 输入 */
+.icon {
+  width: 1px; /* 小于 2，不转换 */
+  height: 2px; /* 会转换 */
+  margin: 3px; /* 会转换 */
+}
+
+/* 输出 */
+.icon {
+  width: 1px;
+  height: 2rpx;
+  margin: 3rpx;
+}
+```

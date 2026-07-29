@@ -23,7 +23,11 @@
   },
   "homepage": "https://github.com/yingye/postcss-px2units#readme",
   "dependencies": {
-    "postcss": "^8.4.31"
+    "postcss": "^8.0.0"
+  },
+  "scripts": {
+    "format": "prettier --write ./index.js",
+    "test": "rstest run"
   },
   "devDependencies": {
     "@rstest/core": "^0.6.6",
